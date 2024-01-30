@@ -14,7 +14,6 @@ export class App extends Component {
   render() {
     return (
       <>
-        <div style={{ maxWidth: 1170, margin: '0 auto', padding: 20 }}>App</div>
         <PokemonForm onSubmit={this.handleFormSubmit} />
         <PokemonInfo pokemonName={this.state.pokemonName} />
       </>
