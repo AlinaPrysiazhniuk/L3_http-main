@@ -1,54 +1,60 @@
-import { Component } from 'react';
 import PokemonErrorView from './PokemonErrorView';
 import PokemonDataView from './PokemonDataView';
 import PokemonPendingView from './PokemonPendingView';
+import { useState, useEffect } from 'react';
 
-export class PokemonInfo extends Component {
-  state = {
-    pokemon: null,
-    error: null,
-    status: 'idle',
-  };
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
 
-  componentDidUpdate(prevProps, prevState) {
-    const prevName = prevProps.pokemonName;
-    const nextName = this.props.pokemonName;
+export default function PokemonInfo({ pokemonName }) {
+  const [pokemon, setPokemonName] = useState(null);
+  const [error, setError] = useState(null);
+  const [status, setStatus] = useState('idle');
 
-    //тут завжди робити перевірку
-    if (prevName !== nextName) {
-      this.setState({ status: 'pending' });
-
-      fetch(`http://pokeapi.co/api/v2/pokemon/${nextName}`)
-        .then(response => {
-          if (response.ok) {
-            return response.json();
-          }
-
-          return Promise.reject(new Error(`No name ${nextName}`));
-        })
-
-        .then(pokemon => this.setState({ pokemon, status: 'resolved' })) //передаємо в активний стейт імя покемона
-        .catch(error => this.setState({ error, status: 'rejected' }));
+  useEffect(() => {
+    if (!pokemonName) {
+      //перший рендер, pokemoName це пустий рядок, не робимо fetch
+      return;
     }
+
+    setStatus(Status.PENDING);
+
+    fetch(`http://pokeapi.co/api/v2/pokemon/${pokemonName}`)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+
+        return Promise.reject(new Error(`No name ${pokemonName}`));
+      })
+
+      .then(pokemon => {
+        setPokemonName(pokemon);
+        setStatus(Status.RESOLVED);
+      }) //передаємо в активний стейт імя покемона
+      .catch(error => {
+        setError(error);
+        setStatus(Status.REJECTED);
+      });
+  }, [pokemonName]);
+
+  if (status === Status.IDLE) {
+    return <div>Enter pokemon name</div>;
+  }
+  //hgfjhgfjhgfg
+  if (status === Status.PENDING) {
+    return <PokemonPendingView pokemon={pokemonName} />;
   }
 
-  render() {
-    const { pokemon, error, status } = this.state;
+  if (status === Status.REJECTED) {
+    return <PokemonErrorView message={error.message} />;
+  }
 
-    if (status === 'idle') {
-      return <div>Enter pokemon name</div>;
-    }
-    //hgfjhgfjhgfg
-    if (status === 'pending') {
-      return <PokemonPendingView />;
-    }
-
-    if (status === 'rejected') {
-      return <PokemonErrorView message={error.message} />;
-    }
-
-    if (status === 'resolved') {
-      return <PokemonDataView pokemon={pokemon} />;
-    }
+  if (status === Status.RESOLVED) {
+    return <PokemonDataView pokemon={pokemon} />;
   }
 }

@@ -1,38 +1,35 @@
-import { Component } from 'react';
+import { useState } from 'react';
 
 const styles = { form: { marginBottom: 20 } };
 
-export class PokemonForm extends Component {
-  state = {
-    pokemonName: '',
+export default function PokemonForm({ onSubmit }) {
+  const [pokemonName, setPokemonName] = useState('');
+
+  const handleNameChange = event => {
+    setPokemonName(event.currentTarget.value.toLowerCase());
   };
 
-  handleNameChange = event => {
-    this.setState({ pokemonName: event.currentTarget.value.toLowerCase() });
-  };
-
-  handleSubmit = event => {
+  const handleSubmit = event => {
     event.preventDefault();
 
-    if (this.state.pokemonName.trim() === '') {
+    if (pokemonName.trim() === '') {
       alert('Enter name pokemon');
       return;
     }
-    this.props.onSubmit(this.state.pokemonName); //передача через пропс імені покемона для пошуку
-    this.setState({ pokemonName: '' }); //очистка форми після відправки
+
+    onSubmit(pokemonName); //передача через пропс імені покемона для пошуку
+    setPokemonName(''); //очистка форми після відправки
   };
 
-  render() {
-    return (
-      <form style={styles.form} onSubmit={this.handleSubmit}>
-        <input
-          type="text"
-          name="pokemonName"
-          value={this.state.pokemonName}
-          onChange={this.handleNameChange}
-        />
-        <button type="submit">Search</button>
-      </form>
-    );
-  }
+  return (
+    <form style={styles.form} onSubmit={handleSubmit}>
+      <input
+        type="text"
+        name="pokemonName"
+        value={pokemonName}
+        onChange={handleNameChange}
+      />
+      <button type="submit">Search</button>
+    </form>
+  );
 }
