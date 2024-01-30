@@ -38,7 +38,7 @@ export class PokemonInfo extends Component {
     if (status === 'idle') {
       return <div>Enter pokemon name</div>;
     }
-
+    //hgfjhgfjhgfg
     if (status === 'pending') {
       return <PokemonPendingView />;
     }
